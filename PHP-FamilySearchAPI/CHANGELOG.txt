@@ -1,0 +1,10 @@
+This file contains the changes made to this library since the last release.
+
+2009-10-07 Updated much of the code to support V2 of the API
+			Read/Search/Match APIs have been fully tested
+			Person Update and Relationship update are still in testing
+2008-08-22	Fixed a bug where PEAR::HTTP library defaulted to PHP style multi-
+			parameters when parsing URLs which caused the Java style
+			duplicate parameters to be truncated from the URL
+2008-08-21	Added automatic throttling support, FSAPIClient::setAutoThrottling, 
+			FSAPIClient::setMaxRetries
