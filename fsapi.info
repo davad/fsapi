@@ -1,0 +1,8 @@
+name = Family Search API Wrapper
+description = Wrapper module for php-fsapi, the Family Search api php impelementation
+package = Family History
+
+core = 7.x
+files[] = familysearchapi.module
+configure = admin/config/fsapi
+

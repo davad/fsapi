@@ -1,0 +1,22 @@
+<?php
+
+/** 
+ * @file
+ * This file provides wrapper functions around the Family Search api
+ */
+
+/** 
+ * Implements hook_menu()
+ */
+
+function fsapi_menu() {
+    $items['admin/config/fsapi'] = array(
+        'title'            => 'Family Search API Settings',
+        'page callback'    => 'drupal_get_form',
+        'page arguments'   => array('fsapi_admin_settings'),
+        'access arguments' => array('administer site configuration'),
+        'file'             => 'fsapi.admin.inc',
+    );
+
+    return $items;
+}
