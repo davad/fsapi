@@ -41,14 +41,14 @@ require_once('FSAPIClient.php');
 
 class FamilySearchProxy extends FamilySearchAPIClient {
 	/* Set DEBUG to true to see the full HTTP requests */
-	var $DEBUG = false;
+	var $DEBUG = true;
 
 	var $hasName;
 	var $devKey;
 
 	var $paths = array(
-	'login'		=>	'/identity/v1/login',
-	'logout'	=>	'/identity/v1/logout',
+	'login'		=>	'/identity/v2/login',
+	'logout'	=>	'/identity/v2/logout',
 	'getPerson'	=>     '/familytree/v2/search',
 	'getPersonById'	=> '/familytree/v2/person/',
 	'addPerson'	=> 'familytree/v2/person',
