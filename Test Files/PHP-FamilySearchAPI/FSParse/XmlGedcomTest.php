@@ -1,6 +1,7 @@
 <?php
 
 require_once dirname(__FILE__) . '/../../../PHP-FamilySearchAPI/FSParse/XMLGEDCOM.php';
+require_once dirname(__FILE__) . '/../../../PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php';
 
 /**
  * Test class for XmlGedcom.
@@ -11,14 +12,28 @@ class XmlGedcomTest extends PHPUnit_Framework_TestCase {
     /**
      * @var XmlGedcom
      */
-    protected $object;
+    protected $xmlGed;
 
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->object = new XmlGedcom;
+        $this->xmlGed = new XmlGedcom;
+
+        $url = 'http://www.dev.usys.org';
+        $username = 'api-user-3005';
+        $password = 'f6d4';
+        $key = 'WCQY-7J1Q-GKVV-7DNM-SQ5M-9Q5H-JX3H-CMJK';
+
+        //--create a new object of FamilySearchProxy
+        $proxy = new FamilySearchProxy(
+                $url,
+                $username,
+                $password,
+                $key);
+
+        $this->xmlGed->setProxy($proxy);
     }
 
     /**
@@ -70,13 +85,10 @@ class XmlGedcomTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @todo Implement testGetProxy().
      */
     public function testGetProxy() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $proxy = $this->xmlGed->getProxy();
+        $this->assertNotNull($proxy);
     }
 
     /**
@@ -130,13 +142,32 @@ class XmlGedcomTest extends PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @todo Implement testBuildSearchQuery().
      */
     public function testBuildSearchQuery() {
-        // Remove the following lines when you implement this test.
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        $person = new XG_Person();
+        $person->name = 'John Smith';
+        $query = $this->xmlGed->buildSearchQuery($person);
+        $this->assertEquals('name=John+Smith', $query);
+    }
+
+    /**
+     */
+    public function testQuerySubmission() {
+        $person = new XG_Person();
+        $person->name = 'John Smith';
+        $query = $this->xmlGed->buildSearchQuery($person);
+        $this->assertEquals('name=John+Smith', $query);
+        $response = $this->xmlGed->getProxy()->getPerson($query.'&maxResults=3', false);
+        $this->xmlGed->parseXml($response);
+
+        $matches = $this->xmlGed->getMatches();
+//        print "matches: ". count($matches) ."\n";
+//        foreach($matches as &$match)
+//        {
+//            print_r($match->getPerson()->getPrimaryName()->getFullText());
+//        }
+//        print_r($matches);
+        $this->assertEquals('Mary Smith', $matches['KW3B-2YY']->getPerson()->getPrimaryName()->getFullText());
     }
 
     /**
