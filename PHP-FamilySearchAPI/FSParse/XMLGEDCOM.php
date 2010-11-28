@@ -143,6 +143,10 @@ class XmlGedcom {
 		return $this->persons;
 	}
 
+        /**
+         *
+         * @return XG_Match[]
+         */
 	function getMatches() {
 		return $this->matches;
 	}
@@ -179,10 +183,14 @@ class XmlGedcom {
 		return $person;
 	}
 
-	function setProxy(&$proxy) {
+	function setProxy(FamilySearchProxy &$proxy) {
 		$this->proxy=$proxy;
 	}
 
+        /**
+         *
+         * @return FamilySearchProxy
+         */
 	function getProxy() {
 		return $this->proxy;
 	}
@@ -283,46 +291,45 @@ class XmlGedcom {
 	 * @param Person $person
 	 * @return string
 	 */
-	function buildSearchQuery(&$person, $type = '') {
+	function buildSearchQuery(XG_Person &$person, $type = '') {
 		if(!is_object($person)) return "";
-		$id = $person->getXref();	//get the individual's id
-		$personName = $person->getFactByType("NAME");
-		$givenName = $personName->getValue("GIVN");
-		$query = $type."givenName=".urlencode($givenName);
-		$surname = $personName->getValue("SURN");
-		$query .= "&".$type."familyName=".urlencode($surname);
-		$birthdate = $person->getBirthDate(false);
-		if (!empty($birthdate)) $query.="&".$type."birthDate=".urlencode($birthdate->date1->Format("A O E"));
-		$birthPlace = $person->getBirthPlace();
-		if (!empty($birthPlace)) $query.="&".$type."birthPlace=".urlencode($birthPlace);
-		$deathdate = $person->getDeathDate(false);
-		if (!empty($deathdate)) $query.="&".$type."deathDate=".urlencode($deathdate->date1->Format("A O E"));
-		$deathPlace = $person->getDeathPlace();
-		if (!empty($deathPlace)) $query.="&".$type."deathPlace=".urlencode($deathPlace);
-
-		if (!empty($type)) return $query;
-
-		$gender = $person->getSex();
-		if ($gender=='M') $query.="&".$type."gender=male";
-		if ($gender=='F') $query.="&".$type."gender=female";
-
-		$spouse = $person->getCurrentSpouse();
-		if (!is_null($spouse)) {
-			$query .= "&".XmlGedcom::buildSearchQuery($spouse, 'spouse.');
-		}
-
-		$family = $person->getPrimaryChildFamily();
-		if (!is_null($family)) {
-			$father = $family->getHusband();
-			if (!is_null($father)) {
-				$query .= "&".XmlGedcom::buildSearchQuery($father, 'father.');
-			}
-				
-			$mother = $family->getWife();
-			if (!is_null($mother)) {
-				$query .= "&".XmlGedcom::buildSearchQuery($mother, 'mother.');
-			}
-		}
+		$personName = $person->getPrimaryName();
+		$query = $type."name=".urlencode($personName);
+                if ($person->getBirthAssertion())
+                {
+                    $birthdate = $person->getBirthAssertion()->getDate()->getNormalized();
+                    $query.="&".$type."birthDate=".urlencode($birthdate->date1->Format("A O E"));
+                }
+//		$birthPlace = $person->getBirthPlace();
+//		if (!empty($birthPlace)) $query.="&".$type."birthPlace=".urlencode($birthPlace);
+//		$deathdate = $person->getDeathDate(false);
+//		if (!empty($deathdate)) $query.="&".$type."deathDate=".urlencode($deathdate->date1->Format("A O E"));
+//		$deathPlace = $person->getDeathPlace();
+//		if (!empty($deathPlace)) $query.="&".$type."deathPlace=".urlencode($deathPlace);
+//
+//		if (!empty($type)) return $query;
+//
+//		$gender = $person->getSex();
+//		if ($gender=='M') $query.="&".$type."gender=male";
+//		if ($gender=='F') $query.="&".$type."gender=female";
+//
+//		$spouse = $person->getCurrentSpouse();
+//		if (!is_null($spouse)) {
+//			$query .= "&".XmlGedcom::buildSearchQuery($spouse, 'spouse.');
+//		}
+//
+//		$family = $person->getPrimaryChildFamily();
+//		if (!is_null($family)) {
+//			$father = $family->getHusband();
+//			if (!is_null($father)) {
+//				$query .= "&".XmlGedcom::buildSearchQuery($father, 'father.');
+//			}
+//
+//			$mother = $family->getWife();
+//			if (!is_null($mother)) {
+//				$query .= "&".XmlGedcom::buildSearchQuery($mother, 'mother.');
+//			}
+//		}
 
 		return $query;
 	}
@@ -1642,6 +1649,10 @@ class XG_HasAssertions {
 		return $this->children;
 	}
 
+        /**
+         *
+         * @return XG_Name
+         */
 	function getPrimaryName() {
 		return $this->name;
 	}
@@ -3011,6 +3022,7 @@ class XG_Assertion {
 
 	/**
 	 * get the person this assertion belongs to
+         * @return XG_Person
 	 */
 	function getPerson() {
 		return $this->person;
