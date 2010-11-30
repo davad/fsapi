@@ -167,7 +167,7 @@ class XmlGedcomTest extends PHPUnit_Framework_TestCase {
 //            print_r($match->getPerson()->getPrimaryName()->getFullText());
 //        }
 //        print_r($matches);
-        $this->assertEquals('Mary Smith', $matches['KW3B-2YY']->getPerson()->getPrimaryName()->getFullText());
+        $this->assertEquals('John Doe', $matches['KW3B-JVJ']->getPerson()->getPrimaryName()->getFullText());
     }
 
     /**
