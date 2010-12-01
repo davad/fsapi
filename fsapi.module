@@ -1,22 +1,89 @@
 <?php
-
 /** 
  * @file
  * This file provides wrapper functions around the Family Search api
  */
 
+
+/**
+ * Implements hook_permission().
+ */
+function fsapi_permission() {
+    return array(
+  	    'administer_fsapi' => array(
+  	        'title' => t('Administer fsapi'),
+  	        'description' => t('Administer Family Search API Settings and access test pages'),
+        ),
+    );
+}
+
 /** 
  * Implements hook_menu()
  */
-
 function fsapi_menu() {
     $items['admin/config/fsapi'] = array(
         'title'            => 'Family Search API Settings',
         'page callback'    => 'drupal_get_form',
         'page arguments'   => array('fsapi_admin_settings'),
-        'access arguments' => array('administer site configuration'),
+        'access arguments' => array('administer fsapi'),
         'file'             => 'fsapi.admin.inc',
+    );
+    $items['fsapi_test'] = array(
+        'title'            => 'Family Search API Test',
+        'page callback'    => 'fsapi_test_page',
+        'access arguments' => array('administer fsapi'),
     );
 
     return $items;
+}
+
+/**
+ * Test page for fsapi
+ *
+ * Build a page that tests that fsapi connects to the family search server and grabs a person object.
+ */
+function fsapi_test_page() {
+    $person = fsapi_getPersonById("KW3B-NZ5");
+    $page = array('#markup' => '<h1>'. t('FSAPI Test Page') . '</h1>');
+    return $page;
+}
+
+/**
+ * Authenticate with family search server.
+ *
+ * Fsapi uses the username, password, key, and server supplied in the admin settings to create a connection to the family search server.
+ *
+ * @return
+ *  XmlGedcom object if connection is successful, ***** if connection fails
+ */
+function fsapi_connect() {
+    require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSParse/XMLGEDCOM.php');
+    require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php');
+    $xmlGed = new XmlGedcom();
+    
+    $url = 'http://www.dev.usys.org';
+    $username = 'api-user-3005';
+    $password = 'f6d4';
+    $key = 'WCQY-7J1Q-GKVV-7DNM-SQ5M-9Q5H-JX3H-CMJK';
+
+    //--create a new object of FamilySearchProxy
+    $proxy = new FamilySearchProxy(
+        $url,
+        $username,
+        $password,
+        $key);
+
+    $xmlGed->setProxy($proxy);
+    return $xmlGed;
+}
+
+/**
+ * Select person by id
+ *
+ * Connect to the family search server and retrieve a person
+ */
+function fsapi_getPersonById($id) {
+    $xmlGed = fsapi_connect();
+    $person = $xmlGed->getPerson($id, 'summary');
+    return $person;
 }

@@ -3,6 +3,6 @@ description = Wrapper module for php-fsapi, the Family Search api php impelement
 package = Family History
 
 core = 7.x
-files[] = familysearchapi.module
+files[] = fsapi.module
 configure = admin/config/fsapi
 
