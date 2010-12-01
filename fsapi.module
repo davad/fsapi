@@ -45,6 +45,7 @@ function fsapi_menu() {
 function fsapi_test_page() {
     $person = fsapi_getPersonById("KW3B-NZ5");
     $page = array('#markup' => '<h1>'. t('FSAPI Test Page') . '</h1>');
+    dpm($person);
     return $page;
 }
 

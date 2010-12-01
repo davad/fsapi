@@ -51,11 +51,11 @@ require_once 'PEAR.php';
 /**
  * Socket class
  */
-require_once 'Net/Socket.php';
+require_once dirname(__FILE__) . '/../Net/Socket.php';
 /**
  * URL handling class
  */ 
-require_once 'Net/URL.php';
+require_once dirname(__FILE__) . '/../Net/URL.php';
 
 /**#@+
  * Constants for HTTP request methods
