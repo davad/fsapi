@@ -43,9 +43,37 @@ function fsapi_menu() {
  * Build a page that tests that fsapi connects to the family search server and grabs a person object.
  */
 function fsapi_test_page() {
-    $person = fsapi_getPersonById("KW3B-NZ5");
     $page = array('#markup' => '<h1>'. t('FSAPI Test Page') . '</h1>');
-    dpm($person);
+
+    $id = arg(1);
+    if(empty($id)) $id = "KW3B-NZG";
+    $person = null;
+    $matches = null;
+    try {
+        $person = fsapi_getPersonById($id);
+    }
+    catch (Exception $e) {
+        $page['#markup'] .= '<p>' . t('No person found') . '</p>';
+        $matches = fsapi_findByName($id);
+    }
+
+    dpm($person,'$person');
+    dpm($matches,'$matches');
+    dpm($id,'$id');
+    
+    
+    if($person == null) {
+        $page['#markup'] .= '<p>' . t('Are you trying to find a person by name?') . '</p>';
+
+        $page['#markup'] .= '<ul>';
+        foreach($matches as $match) {
+            $page['#markup'] .= '<li>'.t('Name') . $match->getPerson()->getPrimaryName()->getFullText() . '</li>';
+        }
+        $page['#markup'] .= '</ul>';
+    }
+    else {
+//        $page['#markup'] .= t('Name') . $person->getPerson()->getPrimaryName()->getFullText();
+    }
     return $page;
 }
 
@@ -82,9 +110,36 @@ function fsapi_connect() {
  * Select person by id
  *
  * Connect to the family search server and retrieve a person
+ *
+ * @return XG_Person object if the server returns a result, null if not
  */
 function fsapi_getPersonById($id) {
     $xmlGed = fsapi_connect();
     $person = $xmlGed->getPerson($id, 'summary');
     return $person;
+}
+
+/**
+ * Find people by name
+ *
+ * Given a name, look for a list of persons with that name
+ *
+ * @param 
+ *   Full name of the person
+ *
+ * @return
+ *  Associative array of people keyed by family search ID
+ *
+ *  TODO: Filter $name for security
+ */
+function fsapi_findByName($name) {
+    $person = new XG_Person();
+    $person->name = $name;
+
+    $xmlGed = fsapi_connect();
+    $query = $xmlGed->buildSearchQuery($person);
+    $response = $xmlGed->getProxy()->getPerson($query.'&maxResults=3', false);
+    $xmlGed->parseXml($response);
+
+    return $xmlGed->getMatches();
 }
