@@ -49,12 +49,15 @@ function fsapi_test_page() {
     if(empty($id)) $id = "KW3B-NZG";
     $person = null;
     $matches = null;
+
+    //Let's try to search by name if ID fails
     try {
         $person = fsapi_getPersonById($id);
     }
     catch (Exception $e) {
         $page['#markup'] .= '<p>' . t('No person found') . '</p>';
         $matches = fsapi_findByName($id);
+        dpm($e, 'Exception');
     }
 
     dpm($person,'$person');
