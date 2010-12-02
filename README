@@ -1,1 +1,1 @@
-This is a drupal modules that gives other modules access to the family search api
+This is a Drupal modules that gives other modules access to the LDS FamilySearch API. Read https://devnet.familysearch.org/docs/api-overview for more information on the API. This code is pre-alpha quality and doesn't really do too much. But you're more than welcome to help out if interested.
