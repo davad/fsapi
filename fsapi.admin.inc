@@ -18,6 +18,7 @@ function fsapi_admin_settings() {
         '#type' => 'fieldset',
         '#title'         => t('Credentials'),
         '#description'   => t('Username, password, and api key to access the Family Search server'),
+    );
 
     $form['fsapi_credentials']['fsapi_username'] = array(
         '#type'          => 'textfield',
