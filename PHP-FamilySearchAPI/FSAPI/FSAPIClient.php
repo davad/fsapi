@@ -45,7 +45,8 @@ class FamilySearchAPIClient {
 	var $readTimeout = array(0, 500000);
 	var $loggedin = false;
 	var $sessionid = null;
-	var $SESSIONID_NAME = "sessionId";
+    var $SESSIONID_NAME = "sessionId";
+    var $expires = null;
 	var $RETURN_TYPE = "unknown";
 	var $hasError;
 	var $maxRetries = 3;
@@ -89,11 +90,18 @@ class FamilySearchAPIClient {
 		$this->password = $password;
 		
 		if (isset($_SESSION['phpfsapi_sessionid'])) {
-			$this->sessionid = $_SESSION['phpfsapi_sessionid'];
-			$this->loggedin = true;
+            $this->sessionid = $_SESSION['phpfsapi_sessionid'];
+			$this->loggedin  = true;
 		}
-		if (isset($_SESSION['phpfsapi_sessionname'])) $this->SESSIONID_NAME = $_SESSION['phpfsapi_sessionname'];
-	}
+        if (isset($_SESSION['phpfsapi_sessionname'])) $this->SESSIONID_NAME = $_SESSION['phpfsapi_sessionname'];
+
+        if (isset($_SESSION['phpfsapi_expires'])) {
+            $this->expires = $_SESSION['phpfsapi_expires']; 
+        }
+        else if(!is_int($this->expires) || $this->expires < time()){
+            $this->logout();
+        }       
+    }
 
 	function setAgent($agent) {
 		$this->agent = $agent;
@@ -195,9 +203,11 @@ class FamilySearchAPIClient {
 	function logout($errorXML = true) {
 		$this->_cookies = null;
 		$this->loggedin = false;
-		$this->sessionid = null;
+        $this->sessionid = null;
+        $this->expires = null;
 		unset($_SESSION['phpfsapi_sessionname']);
-		unset($_SESSION['phpfsapi_sessionid']);
+        unset($_SESSION['phpfsapi_sessionid']);
+        unset($_SESSION['phpfsapi_expires']);
 		return "";
 	}
 
@@ -279,11 +289,17 @@ class FamilySearchAPIClient {
 	 */
 	function getRequestData($id, $type, $query, $errorXML= true){
 
-		//-- check that we are loggedin
+		//-- check that we are loggedin and that the session expires
 		if (!$this->loggedin) {
 			$result = $this->authenticate($errorXML);
 			if (!$this->loggedin) return $result;
-		}
+        }
+        else if ($this->loggedin && ($this->expires < time())) {
+            //If the session has expired, clear session and log in
+            $this->logout();
+			$result = $this->authenticate($errorXML);
+            if (!$this->loggedin) return $result;
+        }
 
 		$this->hasError = false;
 		//check the current url

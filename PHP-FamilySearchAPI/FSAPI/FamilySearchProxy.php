@@ -130,9 +130,13 @@ class FamilySearchProxy extends FamilySearchAPIClient {
 		if ($ct>0) $this->sessionid = $match[1];
 		else $this->hasError = true;
 		
-		//-- store the id on the session for subsequent API calls
+        //-- store the id on the session for subsequent API calls
+        //-- Set when the family search session expires
 		if (session_id() != "") {
-			 $_SESSION['phpfsapi_sessionid'] = $this->sessionid;
+            $_SESSION['phpfsapi_sessionid'] = $this->sessionid;
+            //Set session to expire after an hour
+            $this->expires = time() + (60 * 60);
+            $_SESSION['phpfsapi_expires'] = $this->expires;
 		}
 
 		if($errorXML) return $response;
