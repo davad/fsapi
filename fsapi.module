@@ -59,7 +59,8 @@ function fsapi_test_page() {
         $matches = fsapi_findByName($id);
         dpm($e, 'Exception');
     }
-
+    
+    dpm($_SESSION['phpfsapi_sessionid'], 'php-fsapi session id');
     dpm($person,'$person');
     dpm($matches,'$matches');
     dpm($id,'$id');
@@ -70,7 +71,7 @@ function fsapi_test_page() {
 
         $page['#markup'] .= '<ul>';
         foreach($matches as $match) {
-            $page['#markup'] .= '<li>'.t('Name') . $match->getPerson()->getPrimaryName()->getFullText() . '</li>';
+            $page['#markup'] .= '<li>'.t('Name') . " - " . $match->getPerson()->getPrimaryName()->getFullText() . '</li>';
         }
         $page['#markup'] .= '</ul>';
     }
