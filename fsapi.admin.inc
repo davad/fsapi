@@ -16,6 +16,11 @@
 function fsapi_admin_settings() {
     $access_token = variable_get('fsapi_access_token','');
     $developer_key = variable_get('fsapi_key','');
+    $expires = variable_get('fsapi_access_token_expires', 0);
+    if($expires < time()) {
+        $access_token = '';
+        variable_set('fsapi_access_token', $access_token);
+    }
     
     if(empty($access_token) && !empty($developer_key)) {
         $default_verifier = '';
@@ -81,9 +86,15 @@ function fsapi_authenticate($verifier) {
     if (empty($verifier)) {
         $response = fsapi_get_request_token($server, $requestUrl, $oauth_callback, $consumer_key);
         //dpm($response,'Response from fsapi_get_request_token');
-        $_SESSION['fsapi_oauth_token_secret'] = $response['oauth_token_secret'];
-        $_SESSION['fsapi_oauth_token'] = $response['oauth_token'];
-        drupal_set_message('Click <a href="' . $server . $authorizeUrl . '?oauth_token=' . $response['oauth_token'] . '">here</a> to authenticate to FamilySearch');
+        if (array_key_exists('oauth_problem', $response)) {
+            drupal_set_message(t('Could not get request token: @oauth_problem', $response), 'error');
+        }
+
+        if(array_key_exists('oauth_token', $response) && array_key_exists('oauth_token_secret', $response)) {
+            $_SESSION['fsapi_oauth_token_secret'] = $response['oauth_token_secret'];
+            $_SESSION['fsapi_oauth_token'] = $response['oauth_token'];
+            drupal_set_message('Click <a href="' . $server . $authorizeUrl . '?oauth_token=' . $response['oauth_token'] . '">here</a> to authenticate with FamilySearch');
+        }
     }
 
     /* -----------------------------------------
@@ -101,21 +112,26 @@ function fsapi_authenticate($verifier) {
             }
             return;
         }
+        
+        $expires = time() + 60*60;
         variable_set('fsapi_access_token',$sessionId);
-        drupal_set_message('Authentication to FamilySearch successful.');
-        drupal_set_message("sessionId is: " . $sessionId . "\n");
-        drupal_set_message(htmlentities(fsapi_http($server . "/familytree/v2/user/?sessionId=" . $sessionId)));
+        variable_set('fsapi_access_token_expires', $expires);
+        unset($expires);
+
+        drupal_set_message('Authenticated with FamilySearch successfully.');
+//        drupal_set_message("sessionId is: " . $sessionId . "\n");
+//        drupal_set_message(htmlentities(fsapi_http($server . "/familytree/v2/user/?sessionId=" . $sessionId)));
     }
 }
 
 /* Get a request_token */
 
 function fsapi_get_request_token($server, $requestUrl, $oauth_callback, $consumer_key) {
-    $oauth_token_secret = $_SESSION['fsapi_oauth_token_secret'];
+    $oauth_token_secret = '%26';//Because the method is PLAINTEXT and the "consumer secret" is an empty string, this is always %26
     $timeStamp = time();
     $url = $server . $requestUrl . "?oauth_callback=" . $oauth_callback . "&oauth_consumer_key=";
     $url .= $consumer_key . "&oauth_signature_method=PLAINTEXT&oauth_nonce=99806503068046&oauth_version=1.0&oauth_timestamp=";
-    $url .= $timeStamp . "&oauth_signature=%26" . $oauth_token_secret;
+    $url .= $timeStamp . "&oauth_signature=" . $oauth_token_secret;
     $r = fsapi_http($url);
     return fsapi_oauth_parse_response($r);
 }

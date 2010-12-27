@@ -37,9 +37,7 @@ define('FSAPI_VERSION', '0.92a');
 
 class FamilySearchAPIClient {
 	var $agent;
-	var $userName;
-	var $password;
-	var $url;
+    var $url;
 	var $_cookies = null;
 	var $timeout = 2;
 	var $readTimeout = array(0, 500000);
@@ -73,34 +71,21 @@ class FamilySearchAPIClient {
 	/**
 	 * constructor
 	 *Example:
-	 * 		$proxy = new familySearchProxy('http://ref.dev.usys.org', 'user', 'pass');
+	 * 		$proxy = new FamilySearchAPIClient('http://ref.dev.usys.org', $token);
 	 * or
 	 * 		$proxy = new familySearchProxy();
 	 $proxy->setUrl('http://ref.dev.usys.org');
-	 $proxy->setUserName('user');
-	 $proxy->setPassword('pass');
-	 * @param String 	username
-	 * @param String	password
-	 * @param String	GET or POST, default is GET
+	 $proxy->setToken($token);
+	 * @param String 	url
+	 * @param String	token
 	 */
-	function FamilySearchAPIClient($url='', $userName='', $password=''){
+	function FamilySearchAPIClient($url='', $accessToken){
 		$this->agent = 'PHP-FSAPI/'.FSAPI_VERSION;
 		$this->url = $url;
-		$this->userName = $userName;
-		$this->password = $password;
-		
-		if (isset($_SESSION['phpfsapi_sessionid'])) {
-            $this->sessionid = $_SESSION['phpfsapi_sessionid'];
-			$this->loggedin  = true;
-		}
-        if (isset($_SESSION['phpfsapi_sessionname'])) $this->SESSIONID_NAME = $_SESSION['phpfsapi_sessionname'];
-
-        if (isset($_SESSION['phpfsapi_expires'])) {
-            $this->expires = $_SESSION['phpfsapi_expires']; 
+        $this->sessionid = $accessToken;
+        if(!empty($this->sessionid)) {
+            $this->loggedin = TRUE;
         }
-        else if(!is_int($this->expires) || $this->expires < time()){
-            $this->logout();
-        }       
     }
 
 	function setAgent($agent) {
@@ -109,24 +94,6 @@ class FamilySearchAPIClient {
 
 	function getAgent() {
 		return $this->agent;
-	}
-
-	/**
-	 * set the username
-	 */
-	function setUserName($user){
-		$this->userName = $user;
-	}
-	
-	function getUserName() {
-		return $this->userName;
-	}
-
-	/**
-	 * set the password
-	 */
-	function setPassword($pass){
-		$this->password = $pass;
 	}
 
 	/**
@@ -205,9 +172,6 @@ class FamilySearchAPIClient {
 		$this->loggedin = false;
         $this->sessionid = null;
         $this->expires = null;
-		unset($_SESSION['phpfsapi_sessionname']);
-        unset($_SESSION['phpfsapi_sessionid']);
-        unset($_SESSION['phpfsapi_expires']);
 		return "";
 	}
 
@@ -294,12 +258,6 @@ class FamilySearchAPIClient {
 			$result = $this->authenticate($errorXML);
 			if (!$this->loggedin) return $result;
         }
-        else if ($this->loggedin && ($this->expires < time())) {
-            //If the session has expired, clear session and log in
-            $this->logout();
-			$result = $this->authenticate($errorXML);
-            if (!$this->loggedin) return $result;
-        }
 
 		$this->hasError = false;
 		//check the current url
@@ -331,13 +289,14 @@ class FamilySearchAPIClient {
 
 		//create the request object
 		$request = new HTTP_Request();
-		$request->_useBrackets = false;
-		if (!empty($this->_cookies)||is_null($this->sessionid)) $request->setBasicAuth($this->userName, $this->password);
-		else if (!empty($this->_cookies)) {
-			foreach($this->_cookies as $c=>$cookie) {
-				$request->addCookie($cookie['name'], $cookie['value']);
-			}
-		}
+        $request->_useBrackets = false;
+//  What the heck?  if(!empty(cookies)); else if (!empty(cookies))?  What was that else if even for?  Aparrently it wasn't important since we haven't missed it so far.
+//		if (!empty($this->_cookies)||is_null($this->sessionid)) $request->setBasicAuth($this->userName, $this->password);
+//		else if (!empty($this->_cookies)) {
+//			foreach($this->_cookies as $c=>$cookie) {
+//				$request->addCookie($cookie['name'], $cookie['value']);
+//			}
+//		}
 		$request->addHeader("User-Agent", $this->agent);
 		$request->setURL($con);
 		if ($this->DEBUG) print "<br /><pre>".$request->_buildRequest()."</pre>\n";
@@ -349,14 +308,13 @@ class FamilySearchAPIClient {
 		if (is_null($this->_cookies)) $this->_cookies = $request->getResponseCookies();
 		$response = $request->getResponseBody();
 		//-- check if authenticated
-		if (preg_match("/error code=\"401\"/", $response) && isset($_SESSION['phpfsapi_sessionid'])) {
+		if (preg_match("/error code=\"401\"/", $response) && isset($this->sessionid)) {
 			if ($this->currentRetries < $this->maxRetries) {
 				$this->currentRetries++;
-				$this->authenticate($errorXML);
 				return $this->getRequestData($id, $type, $query, $errorXML);
 			}
 		}
-		else if (preg_match("/error code=\"503\"/", $response) && isset($_SESSION['phpfsapi_sessionid'])) {
+		else if (preg_match("/error code=\"503\"/", $response) && isset($this->sessionid)) {
 			if ($this->currentRetries < $this->maxRetries) {
 				$this->currentRetries++;
 				//-- wait 2 seconds and try again
@@ -524,12 +482,12 @@ class FamilySearchAPIClient {
 		//create the request object
 		$request = new HTTP_Request();
 		$request->_useBrackets = false;
-		if (is_null($this->_cookies)) $request->setBasicAuth($this->userName, $this->password);
-		else {
-			foreach($this->_cookies as $c=>$cookie) {
-				$request->addCookie($cookie['name'], $cookie['value']);
-			}
-		}
+//		if (is_null($this->_cookies)) $request->setBasicAuth($this->userName, $this->password);
+//		else {
+//			foreach($this->_cookies as $c=>$cookie) {
+//				$request->addCookie($cookie['name'], $cookie['value']);
+//			}
+//		}
 		$request->addHeader("User-Agent", $this->agent);
 		$request->addHeader("Content-Type", "text/xml");
 		$request->setURL($con);
@@ -589,7 +547,7 @@ class FamilySearchAPIClient {
 		//send the request and return the xml
 		$request->sendRequest();
 		$response = $request->getResponseBody();
-		if (preg_match("/error code=\"401\"/", $response) && isset($_SESSION['phpfsapi_sessionid'])) {
+		if (preg_match("/error code=\"401\"/", $response) && isset($this->sessionid)) {
 			$this->authenticate($errorXML);
 			return $this->getRequestData($query, $errorXML);
 		}

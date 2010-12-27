@@ -107,7 +107,7 @@ function fsapi_connect() {
     $xmlGed = new XmlGedcom();
     
     //--create a new object of FamilySearchProxy
-    $proxy = new FamilySearchProxy($access_token);
+    $proxy = new FamilySearchProxy('http://www.dev.usys.org',$access_token);
 
     $xmlGed->setProxy($proxy);
     return $xmlGed;
@@ -146,6 +146,6 @@ function fsapi_find_people($name) {
     $query = $xmlGed->buildSearchQuery($person);
     $response = $xmlGed->getProxy()->getPerson($query.'&maxResults=3', false);
     $xmlGed->parseXml($response);
-
+    dpm($xmlGed, 'find_people xmlGed');
     return $xmlGed->getMatches();
 }

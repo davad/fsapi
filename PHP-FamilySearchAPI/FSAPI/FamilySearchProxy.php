@@ -66,26 +66,19 @@ class FamilySearchProxy extends FamilySearchAPIClient {
 	/**
 	 * constructor
 	 *Example:
-	 * 		$proxy = new familySearchProxy('http://ref.dev.usys.org', 'user', 'pass');
+	 * 		$proxy = new familySearchProxy('http://ref.dev.usys.org', $token);
 	 * or
 	 * 		$proxy = new familySearchProxy();
 	 $proxy->setUrl('http://ref.dev.usys.org');
-	 $proxy->setUserName('user');
-	 $proxy->setPassword('pass');
-	 * @param String 	username
-	 * @param String	password
-	 * @param String	GET or POST, default is GET
+	 $proxy->setAccessToken($token);
+	 * @param String 	url
+	 * @param String	accessToken
 	 */
-	function FamilySearchProxy($url='', $userName='', $password='', $devkey=''){
-		parent::FamilySearchAPIClient($url, $userName, $password);
+	function FamilySearchProxy($url='', $accessToken){
+		parent::FamilySearchAPIClient($url, $accessToken);
 		$this->hasError = false;
 		$this->SESSIONID_NAME='sessionId';
 		$this->RETURN_TYPE = "XML";
-		$this->devKey = $devkey;
-		if (empty($this->devKey)) {
-			if (file_exists('familysearchdev.key')) $this->devKey = trim(file_get_contents('familysearchdev.key'));
-			else $this->devKey = '1234567890';
-		}
 	}
 
 	/**
@@ -93,11 +86,13 @@ class FamilySearchProxy extends FamilySearchAPIClient {
 	 * user information
 	 * @param errorXML if the return value contain errors, setting errorXML to false will
 	 * 		return a message decribe the errors, if set to true, will return the error in
-	 * 		xml, default is true
-	 */
+     * 		xml, default is true
+     * @deprecated
+     */
 	function authenticate($errorXML = true){
-		$this->hasError = false;
-		//check the current url
+        $this->hasError = false;
+        return;
+/*		//check the current url
 		if(empty($this->url) || empty($this->userName) || empty($this->password)){
 			$this->hasError = true;
 			return "connection is not set or authentication required";
@@ -141,8 +136,8 @@ class FamilySearchProxy extends FamilySearchAPIClient {
 
 		if($errorXML) return $response;
 		else return $this->checkErrors($request->getResponseBody());
-
-	}
+ */
+    }
 	
 	/**
 	 * Logout from the web service api
@@ -239,10 +234,6 @@ class FamilySearchProxy extends FamilySearchAPIClient {
 	 */
 	function getUserById($id, $query, $errorXML = true){
 		return $this->getRequestData($id, 'getUserById', $query, $errorXML);
-	}
-	
-	function setDevKey($key) {
-		$this->devKey=$key;
 	}
 }
 ?>
