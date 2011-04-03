@@ -8,6 +8,7 @@ function fsapi_get_vars() {
   $access_token = variable_get('fsapi_access_token','');
   $expires = variable_get('fsapi_access_token_expires', 0);
   $reauthenticate = variable_get('fsapi_access_token_reauthenticate', 0);
+  $last_authentication = variable_get('fsapi_access_token_last_authentication', 0);
 
   //Check that the token hasn't expired
   if($expires < time()) {
@@ -15,6 +16,7 @@ function fsapi_get_vars() {
       '#token'   =>  '',
       '#expires' =>  0,
       '#reauthenticate' => 0,
+      '#last_authentication' => 0,
     );
   }
 
@@ -22,6 +24,7 @@ function fsapi_get_vars() {
     '#token'   => $access_token,
     '#expires' => $expires,
     '#reauthenticate' => $reauthenticate,
+    '#last_authentication' => $last_authentication,
   );
 }
 
@@ -38,8 +41,10 @@ function fsapi_set_vars($access_token, $just_authenticated=FALSE) {
 
   //Set the time that the site admin will need to reauthenticate
   if($just_authenticated) {
+    variable_set('fsapi_access_token_last_authentication', time());
+
     $next_month = time() + (30 * 24 * 60 * 60);
-    variable_set('fsapi_access_token_reauthenticate', $next_moth);
+    variable_set('fsapi_access_token_reauthenticate', $next_month);
   }
 }
 
@@ -67,5 +72,7 @@ function fsapi_reset_session() {
   variable_set('fsapi_access_token','');
   variable_set('fsapi_access_token_expires', 0);
   variable_set('fsapi_access_token_reauthenticate', 0);
+  // Don't reset the last_authentication variable.
+  //variable_set('fsapi_access_token_last_authentication', 0;
 }
 

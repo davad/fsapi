@@ -17,11 +17,23 @@ require_once (drupal_get_path('module', 'fsapi') . '/fsapi.oauth.inc');
  */
 function fsapi_admin_settings() {
   $developer_key = variable_get('fsapi_key','');
-
   $access = fsapi_get_vars();
   $access_token = $access['#token'];
   $expires = $access['#expires'];
 
+  // Tell the admin when they last authenticated and when they will need to authenticate next.
+  $date_format = "l, j F Y";
+  if($access['#last_authentication'] > 0) {
+    $date = date($date_format, $access['#last_authentication']);
+    drupal_set_message( "You last authenticated on $date");
+
+    if($access['#reauthenticate'] > 0) {
+      $date = date($date_format, $access['#reauthenticate']);
+      drupal_set_message("You should reauthenticate by $date");
+    }
+  }
+
+  // Start oAuth authentication process
   if(empty($access_token) && !empty($developer_key)) {
     $default_verifier = '';
     if(array_key_exists('oauth_verifier', $_REQUEST)){
@@ -31,6 +43,7 @@ function fsapi_admin_settings() {
     fsapi_authenticate($default_verifier);
   }
 
+  // Form for entering the FamilySearch API key and setting server role
   $form['fsapi_credentials'] = array(
     '#type' => 'fieldset',
     '#title' => t('Credentials'),
