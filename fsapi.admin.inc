@@ -114,7 +114,7 @@ function fsapi_authenticate($verifier) {
     }
 
     //Store access token and set expire time as drupal vars
-    fsapi_set_vars($sessionID);
+    fsapi_set_vars($sessionId);
 
 
     drupal_set_message('Authenticated with FamilySearch successfully.');
