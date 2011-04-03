@@ -38,6 +38,14 @@ function fsapi_menu() {
     return $items;
 }
 
+/** 
+ * Implements hook_cron()
+ */
+function fsapi_cron() {
+  fsapi_refresh_session();
+}
+
+
 /**
  * Test page for fsapi
  *
