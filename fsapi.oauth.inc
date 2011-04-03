@@ -17,8 +17,8 @@ function fsapi_get_vars() {
   }
 
   return array(
-    '#token' =>  $access_token,
-    '#expires'      =>  $expires,
+    '#token'   => $access_token,
+    '#expires' => $expires,
   );
 }
 
