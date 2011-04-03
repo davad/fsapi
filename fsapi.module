@@ -4,6 +4,7 @@
  * This file provides wrapper functions around the Family Search api
  */
 
+require_once (drupal_get_path('module', 'fsapi') . '/fsapi.oauth.inc');
 
 /**
  * Implements hook_permission().
@@ -96,12 +97,15 @@ function fsapi_test_page() {
  * TODO: Alter FamilySearchProxy to use the access token
  */
 function fsapi_connect() {
-  $access_token = variable_get('fsapi_access_token','');
+  $access = fsapi_get_vars();
+  $access_token = $access['#token'];
   dpm($access_token, 'Access Token');
+
   if(empty($access_token)) {
     drupal_set_message('Please have the site admin connect this site with Family Search', 'error');
     return;
   }
+
   require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSParse/XMLGEDCOM.php');
   require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php');
   $xmlGed = new XmlGedcom();
