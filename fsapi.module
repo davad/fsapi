@@ -96,21 +96,21 @@ function fsapi_test_page() {
  * TODO: Alter FamilySearchProxy to use the access token
  */
 function fsapi_connect() {
-    $access_token = variable_get('fsapi_access_token','');
-    dpm($access_token, 'Access Token');
-    if(empty($access_token)) {
-        drupal_set_message('Please have the site admin connect this site with Family Search', 'error');
-        return;
-    }
-    require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSParse/XMLGEDCOM.php');
-    require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php');
-    $xmlGed = new XmlGedcom();
+  $access_token = variable_get('fsapi_access_token','');
+  dpm($access_token, 'Access Token');
+  if(empty($access_token)) {
+    drupal_set_message('Please have the site admin connect this site with Family Search', 'error');
+    return;
+  }
+  require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSParse/XMLGEDCOM.php');
+  require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php');
+  $xmlGed = new XmlGedcom();
 
-    //--create a new object of FamilySearchProxy
-    $proxy = new FamilySearchProxy('http://www.dev.usys.org',$access_token);
+  //--create a new object of FamilySearchProxy
+  $proxy = new FamilySearchProxy('http://www.dev.usys.org',$access_token);
 
-    $xmlGed->setProxy($proxy);
-    return $xmlGed;
+  $xmlGed->setProxy($proxy);
+  return $xmlGed;
 }
 
 /**
