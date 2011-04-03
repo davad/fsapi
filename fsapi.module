@@ -110,8 +110,24 @@ function fsapi_connect() {
   require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php');
   $xmlGed = new XmlGedcom();
 
+  // Check to see if it will connect to the dev Family Search or production Family Search
+  $server_role = variable_get('fsapi_server', 'production');
+  $fsapi_server = '';
+  if($server_role == 'testing') {
+    $fsapi_server = 'http://www.dev.usys.org';
+  }
+  elseif ($server_role == 'production') {
+    $fsapi_server = '';
+    drupal_set_message('The "Production" server role has not been implemented yet', 'error');
+    return;
+  }
+  else {
+    drupal_set_message('The "Server Role" state is invalid. Please have the site admin reauthenticate with Family Search.');
+    return;
+  }
+
   //--create a new object of FamilySearchProxy
-  $proxy = new FamilySearchProxy('http://www.dev.usys.org',$access_token);
+  $proxy = new FamilySearchProxy($fsapi_server ,$access_token);
 
   $xmlGed->setProxy($proxy);
   return $xmlGed;
