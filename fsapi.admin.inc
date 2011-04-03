@@ -7,6 +7,8 @@
  * and testing api server.
  */
 
+require_once (drupal_get_path('module', 'fsapi') . '/fsapi.oauth.inc');
+
 /**
  * Form builder to configure fsapi
  *
@@ -14,22 +16,20 @@
  * @see system_settings_form()
  */
 function fsapi_admin_settings() {
-    $access_token = variable_get('fsapi_access_token','');
-    $developer_key = variable_get('fsapi_key','');
-    $expires = variable_get('fsapi_access_token_expires', 0);
-    if($expires < time()) {
-        $access_token = '';
-        variable_set('fsapi_access_token', $access_token);
+  $developer_key = variable_get('fsapi_key','');
+
+  $access = fsapi_get_vars();
+  $access_token = $access['#token'];
+  $expires = $access['#expires'];
+
+  if(empty($access_token) && !empty($developer_key)) {
+    $default_verifier = '';
+    if(array_key_exists('oauth_verifier', $_REQUEST)){
+      $default_verifier = $_REQUEST['oauth_verifier'];
     }
-    
-    if(empty($access_token) && !empty($developer_key)) {
-        $default_verifier = '';
-        if(array_key_exists('oauth_verifier', $_REQUEST)){
-            $default_verifier = $_REQUEST['oauth_verifier'];
-        }
-        //dpm($default_verifier, 'default_verifier');
-        fsapi_authenticate($default_verifier);
-    }
+    //dpm($default_verifier, 'default_verifier');
+    fsapi_authenticate($default_verifier);
+  }
 
     $form['fsapi_credentials'] = array(
         '#type' => 'fieldset',
@@ -112,11 +112,10 @@ function fsapi_authenticate($verifier) {
             }
             return;
         }
-        
-        $expires = time() + 60*60;
-        variable_set('fsapi_access_token',$sessionId);
-        variable_set('fsapi_access_token_expires', $expires);
-        unset($expires);
+
+        //Store access token and set expire time as drupal vars
+        fsapi_set_vars($sessionID);
+
 
         drupal_set_message('Authenticated with FamilySearch successfully.');
 //        drupal_set_message("sessionId is: " . $sessionId . "\n");

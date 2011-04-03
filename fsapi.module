@@ -122,9 +122,16 @@ function fsapi_connect() {
  * @return XG_Person object if the server returns a result, null if not
  */
 function fsapi_get_person($id) {
-    $xmlGed = fsapi_connect();
-    $person = $xmlGed->getPerson($id, 'summary');
-    return $person;
+  $xmlGed = fsapi_connect();
+  dpm($xmlGed,'$xmlGed');
+
+  //If you can't connect
+  if(empty($xmlGed)) {
+    return;
+  }
+
+  $person = $xmlGed->getPerson($id, 'summary');
+  return $person;
 }
 
 /**
