@@ -54,7 +54,7 @@ function fsapi_admin_settings() {
       'testing' => t('Testing'),
       'production' => t('Production'),
     ),
-    '#default_value' => variable_get('fsapi_server', 'production'),
+    '#default_value' => variable_get('fsapi_server', 'testing'),
   );
 
   return system_settings_form($form);

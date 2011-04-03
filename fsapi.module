@@ -111,7 +111,7 @@ function fsapi_connect() {
   $xmlGed = new XmlGedcom();
 
   // Check to see if it will connect to the dev Family Search or production Family Search
-  $server_role = variable_get('fsapi_server', 'production');
+  $server_role = variable_get('fsapi_server', 'testing');
   $fsapi_server = '';
   if($server_role == 'testing') {
     $fsapi_server = 'http://www.dev.usys.org';
