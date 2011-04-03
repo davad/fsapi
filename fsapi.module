@@ -105,7 +105,7 @@ function fsapi_connect() {
     require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSParse/XMLGEDCOM.php');
     require_once (drupal_get_path('module', 'fsapi') . '/PHP-FamilySearchAPI/FSAPI/FamilySearchProxy.php');
     $xmlGed = new XmlGedcom();
-    
+
     //--create a new object of FamilySearchProxy
     $proxy = new FamilySearchProxy('http://www.dev.usys.org',$access_token);
 
@@ -146,13 +146,13 @@ function fsapi_get_person($id) {
  *  Associative array of people keyed by family search ID
  */
 function fsapi_find_people($name) {
-    $person = new XG_Person();
-    $person->name = check_plain($name);
+  $person = new XG_Person();
+  $person->name = check_plain($name);
 
-    $xmlGed = fsapi_connect();
-    $query = $xmlGed->buildSearchQuery($person);
-    $response = $xmlGed->getProxy()->getPerson($query.'&maxResults=3', false);
-    $xmlGed->parseXml($response);
-    dpm($xmlGed, 'find_people xmlGed');
-    return $xmlGed->getMatches();
+  $xmlGed = fsapi_connect();
+  $query = $xmlGed->buildSearchQuery($person);
+  $response = $xmlGed->getProxy()->getPerson($query.'&maxResults=3', false);
+  $xmlGed->parseXml($response);
+  dpm($xmlGed, 'find_people xmlGed');
+  return $xmlGed->getMatches();
 }
