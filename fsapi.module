@@ -89,7 +89,12 @@ function fsapi_test_page() {
         }
     }
     else {
-//        $page['#markup'] .= t('Name') . $person->getPerson()->getPrimaryName()->getFullText();
+      try{
+        $page['#markup'] .= t('Name'). ": " . $person->getPrimaryName()->getFullText();
+      }
+      catch (Exception $e) {
+        $page['#markup'] .= '<p>' . t('Person found, but has no name') . '</p>';
+      }
     }
     return $page;
 }
